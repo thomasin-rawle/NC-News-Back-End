@@ -1,4 +1,4 @@
-[
+module.exports = [
   {
     "body": "Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — on you it works.",
     "belongs_to": "Living in the shadow of a great man",

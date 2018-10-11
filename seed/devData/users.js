@@ -1,4 +1,4 @@
-[
+module.exports = [
   {
     "username": "tickle122",
     "name": "Tom Tickle",
