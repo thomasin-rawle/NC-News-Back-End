@@ -11,7 +11,7 @@ mongoose.connect(DB_URL)
 
 
 app.use(bodyParser.json())
-app.get('/api', (req, res, next) => {
+app.get('/', (req, res, next) => {
     res.sendFile(`${__dirname}/views/home.html`)
 })
 app.use('/api/topics', topicsRouter)
