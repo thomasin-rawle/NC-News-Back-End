@@ -23,14 +23,6 @@ app.use('/*', (req, res, next) => next({status: 404, msg: `${req.originalUrl} do
 app.use(handle404)
 app.use(handle400)
 app.use(handle500)
- 
-// 404 - endpoint doesnt exists
-// 404 - param doesnt exist
-// 400 - invalid param (bad request)
-// 400 - post request doesnt fit with schema
-
-// invalid queries should be ignored
-
 
 
 module.exports = app;
