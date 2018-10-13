@@ -5,7 +5,7 @@ exports.getComments = (req, res, next) => {
     .populate('belongs_to')
     .populate('created_by')
     .then(comments => {
-        res.status(200).send(comments)
+        res.status(200).send({comments})
     })
 }
 
@@ -18,7 +18,7 @@ exports.updateCommentVotes = (req, res, next) => {
         .populate('belongs_to')
         .populate('created_by')
         .then(comment => {
-            res.status(200).send(comment)
+            res.status(200).send({comment})
         })
 }
 

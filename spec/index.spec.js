@@ -29,10 +29,10 @@ describe('/api', () => {
             return request.get('/api/topics')
                 .expect(200)
                 .then(({body}) => {
-                    expect(body).to.be.an('Array')
-                    expect(body).to.have.length(2)
-                    expect(body[0]).to.have.keys('title', 'slug', '_id', '__v')
-                    expect(body[1].title).to.equal('Cats');
+                    expect(body.allTopics).to.be.an('Array')
+                    expect(body.allTopics).to.have.length(2)
+                    expect(body.allTopics[0]).to.have.keys('title', 'slug', '_id', '__v')
+                    expect(body.allTopics[1].title).to.equal('Cats');
                 })
         });
         describe('/:topic_slug/articles', () => {
@@ -40,9 +40,9 @@ describe('/api', () => {
                 return request.get('/api/topics/cats/articles')
                     .expect(200)
                     .then(({body}) => {
-                        expect(body).to.have.length(2)
+                        expect(body.articlesInTopic).to.have.length(2)
                         expect('Content-Type', /json/);
-                        expect(body[0]).to.have.keys(
+                        expect(body.articlesInTopic[0]).to.have.keys(
                             "votes",
                             "created_at",
                             "_id",
@@ -53,7 +53,7 @@ describe('/api', () => {
                             "comment_count",
                             "__v"
                             )
-                            expect(body[0].comment_count).to.equal(2)
+                            expect(body.articlesInTopic[0].comment_count).to.equal(2)
                     })
             })
             it('GET returns 404 when topic slug does not exist', () => {
@@ -104,10 +104,10 @@ describe('/api', () => {
             return request.get('/api/articles')
                 .expect(200)
                 .then(({body}) => {
-                    expect(body).to.be.an('Array')
-                    expect(body).to.have.length(4)
+                    expect(body.articles).to.be.an('Array')
+                    expect(body.articles).to.have.length(4)
                     expect('Content-Type', /json/);
-                    expect(body[0]).to.have.keys(
+                    expect(body.articles[0]).to.have.keys(
                             "votes",
                             "created_at",
                             "_id",
@@ -118,9 +118,9 @@ describe('/api', () => {
                             "comment_count",
                             "__v"
                             )
-                    expect(body[0]._id).to.equal(`${articleDocs._id}`);
-                    expect(body[0]).to.include({'comment_count' : 2})
-                    expect(body[1]).to.include({'comment_count' : 2})
+                    expect(body.articles[0]._id).to.equal(`${articleDocs._id}`);
+                    expect(body.articles[0]).to.include({'comment_count' : 2})
+                    expect(body.articles[1]).to.include({'comment_count' : 2})
                 })
         });
         describe('/:article_id', () => {
@@ -129,7 +129,7 @@ describe('/api', () => {
                     .expect(200)
                     .then(({body}) => {
                         expect(body.article.title).to.equal('Living in the shadow of a great man')
-                        expect(body).to.be.an('Object')
+                        expect(body.article).to.be.an('Object')
                         expect(body.article).to.include({'comment_count' : 2})
                     })
             });
@@ -151,22 +151,22 @@ describe('/api', () => {
                 return request.patch(`/api/articles/${articleDocs._id}?vote=up`)
                     .expect(200)
                     .then(({body})=> {
-                        expect(body.votes).to.equal(1)
-                        expect(body).to.include({'comment_count' : 2})
+                        expect(body.article.votes).to.equal(1)
+                        expect(body.article).to.include({'comment_count' : 2})
                     })
             });
             it('PATCH returns 200 and removes one from the vote count', () => {
                 return request.patch(`/api/articles/${articleDocs._id}?vote=down`)
                     .expect(200)
                     .then(({body}) => {
-                        expect(body.votes).to.equal(-1)
+                        expect(body.article.votes).to.equal(-1)
                     })
             });
             it('PATCH returns 200 and ignores query', () => {
                 return request.patch(`/api/articles/${articleDocs._id}?vote=ken_bruce`)
                     .expect(200)
                     .then(({body}) => {
-                        expect(body.votes).to.equal(0)
+                        expect(body.article.votes).to.equal(0)
                     })    
             });
             describe('/comments', () => {
@@ -174,9 +174,9 @@ describe('/api', () => {
                     return request.get(`/api/articles/${articleDocs._id}/comments`)
                         .expect(200)
                         .then(({body}) => {
-                            expect(body).to.have.length(2)
-                            expect(body).to.be.an('Array')
-                            expect(body[0].votes).to.equal(7)
+                            expect(body.comments).to.have.length(2)
+                            expect(body.comments).to.be.an('Array')
+                            expect(body.comments[0].votes).to.equal(7)
                         })
                 });
                 it('GET returns 404 when article has no comments', () => {
@@ -258,9 +258,10 @@ describe('/api', () => {
             return request.get('/api/comments')
                 .expect(200)
                 .then(({body}) => {
-                    expect(body).to.be.an('Array')
-                    expect(body).to.have.length(8)
-                    expect(body[0]).to.have.keys(
+                   
+                    expect(body.comments).to.be.an('Array')
+                    expect(body.comments).to.have.length(8)
+                    expect(body.comments[0]).to.have.keys(
                             "votes",
                             "created_at",
                             "_id",
@@ -269,7 +270,7 @@ describe('/api', () => {
                             "created_by",
                             "__v"
                             )
-                    expect(body[0]._id).to.equal(`${commentsDocs._id}`);
+                    expect(body.comments[0]._id).to.equal(`${commentsDocs._id}`);
                 })
         });
         describe('/:comment_id', () => {
@@ -277,21 +278,21 @@ describe('/api', () => {
                 return request.patch(`/api/comments/${commentsDocs._id}?vote=up`)
                     .expect(200)
                     .then(({body}) => {
-                        expect(body.votes).to.equal(8)
+                        expect(body.comment.votes).to.equal(8)
                     })
             });
             it('PATCH returns 200 and removes one from the vote count of a comment', () => {
                 return request.patch(`/api/comments/${commentsDocs._id}?vote=down`)
                     .expect(200)
                     .then(({body}) => {
-                        expect(body.votes).to.equal(6)
+                        expect(body.comment.votes).to.equal(6)
                     })
             });
             it('PATCH returns 200 and removes one from the vote count of a comment', () => {
                 return request.patch(`/api/comments/${commentsDocs._id}?penguins=cool`)
                     .expect(200)
                     .then(({body}) => {
-                        expect(body.votes).to.equal(7)
+                        expect(body.comment.votes).to.equal(7)
                     })
             });
             it('DELETE returns 200 and removes the requested comment', () => {
@@ -301,8 +302,8 @@ describe('/api', () => {
                         expect(body.msg).to.equal('Comment has been successfully deleted')
                         return request.get('/api/comments')
                     })
-                    .then(comments => {
-                        expect(comments.body.length).to.equal(7)
+                    .then(({body}) => {
+                        expect(body.comments.length).to.equal(7)
                     })
 
             });

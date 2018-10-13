@@ -10,7 +10,7 @@ exports.getAllArticles = (req, res, next) => {
             })
         })
         .then(articles => {
-               res.status(200).send(articles)
+               res.status(200).send({articles})
         })
         .catch(next)
 }
@@ -38,7 +38,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
     Comment.find({'belongs_to': article_id})
     .then(comments => {
         if (!comments.length) return Promise.reject({status: 404, msg: 'no comments found'})
-        res.status(200).send(comments)
+        res.status(200).send({comments})
     })
     .catch(err => {
         if (err.name === 'CastError') next({status: 400, msg: 'invalid article id'})
@@ -89,6 +89,6 @@ exports.updateArticleVotes = (req, res, next) => {
         })
         .then(([origArticle, comment_count]) => {
             const article = {...origArticle, comment_count}
-            res.status(200).send(article)
+            res.status(200).send({article})
         })
 }

@@ -3,7 +3,7 @@ const {Topic, Article, Comment} = require('../models')
 exports.getAllTopics = (req, res, next) => {
     Topic.find()
     .then((allTopics) => {
-        res.status(200).send(allTopics)
+        res.status(200).send({allTopics})
     })
     .catch(next)
 }
@@ -23,7 +23,7 @@ exports.getTopicArticles = (req, res, next) => {
     })
     .then(articlesInTopic => {
         if (!articlesInTopic.length) return Promise.reject({status: 404, msg: 'no articles found on that topic'})
-        res.status(200).send(articlesInTopic)
+        res.status(200).send({articlesInTopic})
     }) 
     .catch(next)
 }
