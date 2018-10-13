@@ -2,7 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose');
 const app = express();
 const bodyParser = require('body-parser');
-const {DB_URL} = require('./config');
+const {DB_URL} = process.env.NODE_ENV === 'production' ? process.env : require('./config');
 const {topicsRouter, articlesRouter, commentsRouter, usersRouter} = require('./routes');
 const {handle404, handle400, handle500} = require('./error-handlers')
 
