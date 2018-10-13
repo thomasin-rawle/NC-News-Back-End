@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const request = require('supertest')(app);
 const seedDB = require('../seed/seed');
 const data = require('../seed/testData')
-const {Comment} = require('../models')
 
 describe('/api', () => {
     let articleDocs, commentsDocs, usersDocs, topicsDocs;
@@ -72,10 +71,9 @@ describe('/api', () => {
                         "body": "I've never met a cat that I didn't like. Said nobody ever."
                     })
                     .expect(201)
-                    .then(res => {
-                        console.log(res.body)
-                        expect(res.body.article.title).to.equal('Safety at risk when cat is near?')
-                        expect(res.body.article).to.have.keys(
+                    .then(({body}) => {
+                        expect(body.article.title).to.equal('Safety at risk when cat is near?')
+                        expect(body.article).to.have.keys(
                             "votes",
                             "created_at",
                             "_id",
@@ -125,7 +123,7 @@ describe('/api', () => {
                     expect(body[1]).to.include({'comment_count' : 2})
                 })
         });
-        describe.only('/:article_id', () => {
+        describe('/:article_id', () => {
             it('GET returns 200 and an article when given valid id', () => {
                 return request.get(`/api/articles/${articleDocs._id}`)
                     .expect(200)
@@ -149,38 +147,36 @@ describe('/api', () => {
                         expect(body.msg).to.equal('invalid article id')
                     })
             });
-            it.only('PATCH returns 200 and adds one to the vote count', () => {
+            it('PATCH returns 200 and adds one to the vote count', () => {
                 return request.patch(`/api/articles/${articleDocs._id}?vote=up`)
                     .expect(200)
                     .then(({body})=> {
                         expect(body.votes).to.equal(1)
                         expect(body).to.include({'comment_count' : 2})
                     })
-                   
             });
             it('PATCH returns 200 and removes one from the vote count', () => {
                 return request.patch(`/api/articles/${articleDocs._id}?vote=down`)
                     .expect(200)
-                    .then(res => {
-                        expect(res.body.votes).to.equal(-1)
+                    .then(({body}) => {
+                        expect(body.votes).to.equal(-1)
                     })
-                   
             });
             it('PATCH returns 200 and ignores query', () => {
                 return request.patch(`/api/articles/${articleDocs._id}?vote=ken_bruce`)
                     .expect(200)
-                    .then(res => {
-                        expect(res.body.votes).to.equal(0)
+                    .then(({body}) => {
+                        expect(body.votes).to.equal(0)
                     })    
             });
             describe('/comments', () => {
                 it('GET returns 200 and an articles comments by article id', () => {
                     return request.get(`/api/articles/${articleDocs._id}/comments`)
                         .expect(200)
-                        .then(res => {
-                            expect(res.body).to.have.length(2)
-                            expect(res.body).to.be.an('Array')
-                            expect(res.body[0].votes).to.equal(7)
+                        .then(({body}) => {
+                            expect(body).to.have.length(2)
+                            expect(body).to.be.an('Array')
+                            expect(body[0].votes).to.equal(7)
                         })
                 });
                 it('GET returns 404 when article has no comments', () => {
@@ -254,7 +250,6 @@ describe('/api', () => {
                             expect(body.msg).to.equal('commenting on non-existent article')  
                         })
                 });
-               
             })
         })
     })
@@ -263,7 +258,6 @@ describe('/api', () => {
             return request.get('/api/comments')
                 .expect(200)
                 .then(({body}) => {
-                    console.log(body)
                     expect(body).to.be.an('Array')
                     expect(body).to.have.length(8)
                     expect(body[0]).to.have.keys(
@@ -282,23 +276,22 @@ describe('/api', () => {
             it('PATCH returns 200 and adds one to the vote count of a comment', () => {
                 return request.patch(`/api/comments/${commentsDocs._id}?vote=up`)
                     .expect(200)
-                    .then(res => {
-                        
-                        expect(res.body.votes).to.equal(8)
+                    .then(({body}) => {
+                        expect(body.votes).to.equal(8)
                     })
             });
             it('PATCH returns 200 and removes one from the vote count of a comment', () => {
                 return request.patch(`/api/comments/${commentsDocs._id}?vote=down`)
                     .expect(200)
-                    .then(res => {
-                        expect(res.body.votes).to.equal(6)
+                    .then(({body}) => {
+                        expect(body.votes).to.equal(6)
                     })
             });
             it('PATCH returns 200 and removes one from the vote count of a comment', () => {
                 return request.patch(`/api/comments/${commentsDocs._id}?penguins=cool`)
                     .expect(200)
-                    .then(res => {
-                        expect(res.body.votes).to.equal(7)
+                    .then(({body}) => {
+                        expect(body.votes).to.equal(7)
                     })
             });
             it('DELETE returns 200 and removes the requested comment', () => {
@@ -329,7 +322,6 @@ describe('/api', () => {
             });
         })
     })
-
     describe('/users', () => {
         describe('/:username', () => {
             it('GET returns 200 and when passed a username, returns user profile', () => {

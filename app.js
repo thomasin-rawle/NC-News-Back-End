@@ -9,8 +9,11 @@ const {handle404, handle400, handle500} = require('./error-handlers')
 mongoose.connect(DB_URL)
     .then(() => console.log(`connected to ${DB_URL}`));
 
-//app.use('/api')
+
 app.use(bodyParser.json())
+app.get('/api', (req, res, next) => {
+    res.sendFile(`${__dirname}/views/home.html`)
+})
 app.use('/api/topics', topicsRouter)
 app.use('/api/articles', articlesRouter)
 app.use('/api/comments', commentsRouter)
