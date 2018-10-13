@@ -1,18 +1,30 @@
 const {Article, Comment} = require('../models')
 
 exports.getAllArticles = (req, res, next) => {
-    Article.find()
+   Promise.all([Article.find().lean().populate('created_by'), Comment.find().lean()])
+        .then(([articles, comments]) => {
+            return articles.map(article => {
+                let passedComments = comments.filter(comment => comment.belongs_to.toString() === article._id.toString())
+                let comment_count = passedComments.length
+               return { ...article, comment_count}
+            })
+        })
         .then(articles => {
-            res.status(200).send(articles)
+               res.status(200).send(articles)
         })
         .catch(next)
 }
-
 exports.getArticleById = (req, res, next) => {
     const {article_id} = req.params
-    Article.findById(article_id)
+   
+    Article.findById(article_id).lean()
+        .populate('created_by')
         .then(article => {
             if (!article) return Promise.reject({status: 404, msg: 'article not found'})
+            else return Promise.all([article, Comment.count({'belongs_to': article_id})])
+        })
+        .then(([oldArticle, comment_count]) => {
+            const article = {...oldArticle, comment_count}
             res.status(200).send({article})
         })
         .catch(err => {
@@ -38,10 +50,7 @@ exports.postCommentToArticle = (req, res, next) => {
     const {article_id} = req.params
     Article.findById(article_id)
     .then(article => {
-        if (!article) return next({status: 404, msg: 'commenting on non-existent article'})
-    })
-    .catch(err => {
-        if (err.name === 'CastError') next({status: 400, msg: 'invalid article id'})
+        if (!article) return Promise.reject({status: 404, msg: 'commenting on non-existent article'})
     })
     .then(()=> {
         const body = req.body;
@@ -52,11 +61,18 @@ exports.postCommentToArticle = (req, res, next) => {
         })
         return post.save()
     })
+    .then(newComment => {
+       const populatedComment = Comment.findById(newComment._id)
+            .populate('created_by')
+            .populate('belongs_to')
+            return populatedComment
+    })
     .then(comment => {
          res.status(201).send({comment})
     })
     .catch(err => {
-        if (err.name === 'ValidationError') next({status: 400, msg: 'comment not properly formatted'})
+        if (err.name === 'CastError') next({status: 400, msg: 'invalid article id'})
+        else if (err.name === 'ValidationError') next({status: 400, msg: 'comment not properly formatted'})
         else next(err)           
     })
 }
@@ -66,20 +82,13 @@ exports.updateArticleVotes = (req, res, next) => {
     const {article_id} = req.params
     let inc = vote === 'up' ? 1 : vote === 'down' ? -1 : 0
 
-    Article.findByIdAndUpdate(article_id, { $inc: { votes : inc }}, {new: true})
-        .then(article => {
-            res.status(201).send(article)
+    Article.findByIdAndUpdate(article_id, { $inc: { votes : inc }}, {new: true}).lean()
+        .populate('created_by')
+        .then(origArticle => {
+            return Promise.all([origArticle, Comment.count({'belongs_to' : origArticle._id})])
+        })
+        .then(([origArticle, comment_count]) => {
+            const article = {...origArticle, comment_count}
+            res.status(200).send(article)
         })
 }
-
-
-// const validateQuery = (queries, ...validQueries) => {
-//     return validQueries.reduce((acc, validQuery) => {
-//         if (queries[validQuery]) acc[validQuery] = queries[validQueries];
-//         return acc;
-//         }, {})
-// }
-// const validQueries = validateQuery(req.query, 'vote')
-// Articles.find(validQueries)
-
-//commenting on non-existent article
