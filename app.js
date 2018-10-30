@@ -1,5 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose');
+const cors = require('cors');
 const app = express();
 const bodyParser = require('body-parser');
 const {DB_URL} = process.env.NODE_ENV === 'production' ? process.env : require('./config');
@@ -10,7 +11,7 @@ mongoose.connect(DB_URL)
     .then(() => console.log(`connected to ${DB_URL}`));
 
 
-app.use(bodyParser.json())
+app.use(bodyParser.json(), cors())
 app.get('/api', (req, res, next) => {
     res.sendFile(`${__dirname}/views/home.html`)
 })
