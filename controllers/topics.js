@@ -21,9 +21,9 @@ exports.getTopicArticles = (req, res, next) => {
                 return { ...article, comment_count}
         })
     })
-    .then(articlesInTopic => {
-        if (!articlesInTopic.length) return Promise.reject({status: 404, msg: 'no articles found on that topic'})
-        res.status(200).send({articlesInTopic})
+    .then(articles => {
+        if (!articles.length) return Promise.reject({status: 404, msg: 'no articles found on that topic'})
+        res.status(200).send({articles})
     }) 
     .catch(next)
 }
