@@ -39,7 +39,7 @@ exports.postArticleToTopic = (req, res, next) => {
       })
       post.save()
         .then(postedArticle => {
-          return Article.findOne({'_id' : postedArticle._id}).lean()
+          return Article.findOne({'_id' : postedArticle._id}).populate('created_by').lean()
         })
         .then(foundArticle => {
             let comment_count = 0;
