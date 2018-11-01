@@ -36,6 +36,7 @@ exports.getArticleById = (req, res, next) => {
 exports.getCommentsByArticleId = (req, res, next) => {
     const {article_id} = req.params
     Comment.find({'belongs_to': article_id})
+    .populate('created_by')
     .then(comments => {
         if (!comments.length) return Promise.reject({status: 404, msg: 'no comments found'})
         res.status(200).send({comments})
